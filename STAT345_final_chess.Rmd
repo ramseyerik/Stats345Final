@@ -20,18 +20,46 @@ Advice for getting started:
 
 ```{r}
 install.packages("rchess")
+```
+
+```{r}
 library(rchess)
+library(rvest)
+library(stringr)
 chss <- Chess$new()
-chss$moves()
 chss$clear()
 chss$moves(verbose = TRUE)
-chss$put("k", "w","e6")
-plot(chss)
-chss$moves()
-chss$moves()[1:length(chss$moves())]
-chss$move("Kd6#")
-sample(1:length(chss$moves()), 1)
-chss$put("k", "b", "d6")
+#Purpose: To select a random square to put the chosen piece on
+#input: string of "q" for a queen, "k" for a king, "p" for a pawn, "n" for a knight, "r" for a rook, "b" for a bishop
+#output: A chess board with a randomly placed piece of the users choice
+selector_place <- function(piece){
+  number <- sample(1:8, 1)
+  letter <- sample(letters[1:8], 1)
+  spot <- paste(letter, number, sep = "")
+  chss$put(piece, "w", spot)
+  plot(chss)
+}
+#Purpose: To make a random move and then change the color of the piece so as to avoid having to have more that one piece on the board.
+#Input: None
+#Output: Moves the a chess piece randomly and changes the chess pieces color
+selector_move <- function(){
+  move_num <- sample(1:length(chss$moves()), 1)
+  move_choice <- chss$moves()[move_num]
+  chss$move(move_choice)
+  new_square <- str_match(move_choice, "[abcdefgh][12345678]")
+  piece_changer <- chss$get(new_square)
+  color_change <- ""
+  if(piece_changer$color == "w"){
+    color_change <- "b"
+  }
+  else{
+    color_change <- "w"
+  }
+  chss$put(piece_changer$type, color_change, new_square)
+  plot(chss)
+}
+selector_place("b")
+selector_move()
 ```
 
 2. _Popular Destinations_ Use your functions from part 1 to simulate 1000 moves, starting from several different positions. Create a data visualization of the resulting moves (or alternatively, of the resulting positions).
