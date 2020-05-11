@@ -66,6 +66,232 @@ selector_move()
 
 3. _Vacation Duration_ How many moves does it take for each piece to return where it started? Does it matter where you start? Characterize these distributions.
 
+###### Bishop Functions
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+chssB <- Chess$new()
+chssB$clear()
+chssB$moves(verbose = TRUE)
+
+selector_placeB <- function(piece){
+  number <- sample(1:8, 1)
+  letter <- sample(letters[1:8], 1)
+  spot <- paste(letter, number, sep = "")
+  chssB$put(piece, "w", spot)
+  plot(chssB)
+}
+
+selector_moveB <- function(){
+  move_num <- sample(1:length(chssB$moves()), 1)
+  move_choice <- chssB$moves()[move_num]
+  chssB$move(move_choice)
+  new_square <- str_match(move_choice, "[abcdefgh][12345678]")
+  piece_changer <- chssB$get(new_square)
+  color_change <- ""
+  if(piece_changer$color == "w"){
+    color_change <- "b"
+  }
+  else{
+    color_change <- "w"
+  }
+  chssB$put(piece_changer$type, color_change, new_square)
+  plot(chssB)
+}
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+selector_placeB("b")
+replicate(1000, selector_moveB()) ## Repeats moves 1000 times
+bishop_position <- chssB$history(verbose = TRUE) ## Creates data frame to track position
+bishopDf <- subset(bishop_position, to == from[1])
+originalBishop <- bishopDf[1,7]
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+originalBishop
+```
+
+###### Rook Functions
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+chssR <- Chess$new()
+chssR$clear()
+chssR$moves(verbose = TRUE)
+
+selector_placeR <- function(piece){
+  number <- sample(1:8, 1)
+  letter <- sample(letters[1:8], 1)
+  spot <- paste(letter, number, sep = "")
+  chssR$put(piece, "w", spot)
+  plot(chssR)
+}
+
+selector_moveR <- function(){
+  move_num <- sample(1:length(chssR$moves()), 1)
+  move_choice <- chssR$moves()[move_num]
+  chssR$move(move_choice)
+  new_square <- str_match(move_choice, "[abcdefgh][12345678]")
+  piece_changer <- chssR$get(new_square)
+  color_change <- ""
+  if(piece_changer$color == "w"){
+    color_change <- "b"
+  }
+  else{
+    color_change <- "w"
+  }
+  chssR$put(piece_changer$type, color_change, new_square)
+  plot(chssR)
+}
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+selector_placeR("r")
+replicate(1000, selector_moveR()) ## Repeats moves 1000 times
+rook_position <- chssR$history(verbose = TRUE) ## Creates data frame to track
+rookDf <- subset(rook_position, to == from[1])
+originalRook <- rookDf[1,7]
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+originalRook
+```
+
+###### Knight Functions
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+chssN <- Chess$new()
+chssN$clear()
+chssN$moves(verbose = TRUE)
+
+selector_placeN <- function(piece){
+  number <- sample(1:8, 1)
+  letter <- sample(letters[1:8], 1)
+  spot <- paste(letter, number, sep = "")
+  chssN$put(piece, "w", spot)
+  plot(chssN)
+}
+
+selector_moveN <- function(){
+  move_num <- sample(1:length(chssN$moves()), 1)
+  move_choice <- chssN$moves()[move_num]
+  chssN$move(move_choice)
+  new_square <- str_match(move_choice, "[abcdefgh][12345678]")
+  piece_changer <- chssN$get(new_square)
+  color_change <- ""
+  if(piece_changer$color == "w"){
+    color_change <- "b"
+  }
+  else{
+    color_change <- "w"
+  }
+  chssN$put(piece_changer$type, color_change, new_square)
+  plot(chssN)
+}
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+selector_placeN("n")
+replicate(1000, selector_moveN()) ## Repeats moves 1000 times
+knight_position <- chssN$history(verbose = TRUE) ## Creates data frame to track
+knightDf <- subset(knight_position, to == from[1])
+originalKnight <- knightDf[1,7]
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+originalKnight
+```
+
+###### Queen Functions
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+chssQ <- Chess$new()
+chssQ$clear()
+chssQ$moves(verbose = TRUE)
+
+selector_placeQ <- function(piece){
+  number <- sample(1:8, 1)
+  letter <- sample(letters[1:8], 1)
+  spot <- paste(letter, number, sep = "")
+  chssQ$put(piece, "w", spot)
+  plot(chssQ)
+}
+
+selector_moveQ <- function(){
+  move_num <- sample(1:length(chssQ$moves()), 1)
+  move_choice <- chssQ$moves()[move_num]
+  chssQ$move(move_choice)
+  new_square <- str_match(move_choice, "[abcdefgh][12345678]")
+  piece_changer <- chssQ$get(new_square)
+  color_change <- ""
+  if(piece_changer$color == "w"){
+    color_change <- "b"
+  }
+  else{
+    color_change <- "w"
+  }
+  chssQ$put(piece_changer$type, color_change, new_square)
+  plot(chssQ)
+}
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+selector_placeQ("q")
+replicate(1000, selector_moveQ()) ## Repeats moves 1000 times
+queen_position <- chssQ$history(verbose = TRUE) ## Creates data frame to track position
+queenDf <- subset(queen_position, to == from[1]) ## Df with only moves that returned to original position
+originalQueen <- queenDf[1,7] ## Df with first turn where piece returned to its original position
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+originalQueen
+```
+
+###### King Functions
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+chssK <- Chess$new()
+chssK$clear()
+chssK$moves(verbose = TRUE)
+
+selector_placeK <- function(piece){
+  number <- sample(1:8, 1)
+  letter <- sample(letters[1:8], 1)
+  spot <- paste(letter, number, sep = "")
+  chssK$put(piece, "w", spot)
+  plot(chssK)
+}
+
+selector_moveK <- function(){
+  move_num <- sample(1:length(chssK$moves()), 1)
+  move_choice <- chssK$moves()[move_num]
+  chssK$move(move_choice)
+  new_square <- str_match(move_choice, "[abcdefgh][12345678]")
+  piece_changer <- chssK$get(new_square)
+  color_change <- ""
+  if(piece_changer$color == "w"){
+    color_change <- "b"
+  }
+  else{
+    color_change <- "w"
+  }
+  chssK$put(piece_changer$type, color_change, new_square)
+  plot(chssK)
+}
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+selector_placeK("k")
+replicate(1000, selector_moveK()) ## Repeats moves 1000 times. Function gives back an error FIX ME. length of assertion in not 1
+king_position <- chssK$history(verbose = TRUE) ## Creates data frame to track
+kingDf <- subset(king_position, to == from[1])
+originalKing <- kingDf[1,7]
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+originalKing
+```
+
+
 4. _Visit Some Friends_ Consider two drunken chessmasters playing against each other. They both start with a king and a queen, in the traditional starting positions. They each will take turns making moves at random from all possible legal moves. The players are allowed to "attack" the other player's pieces, and the game stops when a player attacks the other player's King. Simulate this process. (Since these chessmasters are presumably drunk, you may ignore the conditions and rules that place a King into "check".)
 
 5. _Share the Pictures_ Where do the games in part 4 typically end?  How long does it take for these games to end? Create data visualizations to summarize these drunken games.
