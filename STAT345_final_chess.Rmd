@@ -23,6 +23,7 @@ install.packages("rchess")
 ```
 
 ```{r}
+#Note that all of this is designed for only one piece on the board and will fail for multiple pieces without being edited to work with multiple pieces.
 library(rchess)
 library(rvest)
 library(stringr)
@@ -58,15 +59,31 @@ selector_move <- function(){
   chss$put(piece_changer$type, color_change, new_square)
   plot(chss)
 }
-selector_place("b")
-selector_move()
+#Purpose: Allows for several moves all at once
+#Input: number of moves desired to be done for numeric n
+#Output: A chess board after the moves are done being made
+multi_mover <- function(n){
+  replicate(n, selector_move())
+  plot(chss)
+}
+selector_place("n")
+multi_mover(9)
 ```
 
 2. _Popular Destinations_ Use your functions from part 1 to simulate 1000 moves, starting from several different positions. Create a data visualization of the resulting moves (or alternatively, of the resulting positions).
+```{r}
+
+```
 
 3. _Vacation Duration_ How many moves does it take for each piece to return where it started? Does it matter where you start? Characterize these distributions.
+```{r}
+
+```
 
 4. _Visit Some Friends_ Consider two drunken chessmasters playing against each other. They both start with a king and a queen, in the traditional starting positions. They each will take turns making moves at random from all possible legal moves. The players are allowed to "attack" the other player's pieces, and the game stops when a player attacks the other player's King. Simulate this process. (Since these chessmasters are presumably drunk, you may ignore the conditions and rules that place a King into "check".)
+```{r}
+
+```
 
 5. _Share the Pictures_ Where do the games in part 4 typically end?  How long does it take for these games to end? Create data visualizations to summarize these drunken games.
 
