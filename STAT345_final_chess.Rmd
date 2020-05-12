@@ -66,18 +66,329 @@ multi_mover <- function(n){
   replicate(n, selector_move())
   plot(chss)
 }
-selector_place("n")
-multi_mover(9)
+#Purpose: Allows the user to select a piece to move around the board a selected number of times
+#Input: piece is a string of either "q", "r", "b", or "n", n is the number of times you'd like the piece to move. (Note that the King doesn't work as the game is over when it moves by itself)
+#Output: The chess board with the piece at the final position
+piece_chooser <- function(piece, n) {
+  selector_place(piece)
+  multi_mover(n)
+  chss$plot()
+}
+piece_chooser("n", 20)
+chss$clear()
+piece_chooser("r", 20)
+chss$clear()
+piece_chooser("q", 20) 
+chss$clear()
+piece_chooser("b", 20)
+#Purpose: Allows the king to move and then resets the board so that the king may move again without the whole game resetting
+#Input: No input
+#Output: The king moved to a new square and a restarted game
+king_move <- function(){
+  move_num <- sample(1:length(chss$moves()), 1)
+  move_choice <- chss$moves()[move_num]
+  chss$move(move_choice)
+  new_square <- str_match(move_choice, "[abcdefgh][12345678]")
+  piece_changer <- chss$get(new_square)
+  chss$clear()
+  chss$put(piece_changer$type, "w", new_square)
+  return(new_square)
+}
+#Purpose: Store the information from the king move function into a vector
+#Input: No input, just a place holder n so that the lapply function will operate
+#Output: The current location that the King moved to
+storer <- function(n){
+  past_loco <- data.frame()
+  past_loco <- c(king_move(), past_loco)
+  return(past_loco)
+}
+selector_place("k")
+saver <- lapply(1:1000, storer)
+king_saver <- data.frame(saver)
+king_saver
+chss$plot()
+
+
 ```
 
 2. _Popular Destinations_ Use your functions from part 1 to simulate 1000 moves, starting from several different positions. Create a data visualization of the resulting moves (or alternatively, of the resulting positions).
 ```{r}
 
+chss$history()
 ```
 
 3. _Vacation Duration_ How many moves does it take for each piece to return where it started? Does it matter where you start? Characterize these distributions.
-```{r}
 
+```{r}
+```
+###### Bishop Functions
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+chssB <- Chess$new()
+chssB$clear()
+chssB$moves(verbose = TRUE)
+selector_placeB <- function(piece){
+  number <- sample(1:8, 1)
+  letter <- sample(letters[1:8], 1)
+  spot <- paste(letter, number, sep = "")
+  chssB$put(piece, "w", spot)
+  plot(chssB)
+}
+selector_moveB <- function(){
+  move_num <- sample(1:length(chssB$moves()), 1)
+  move_choice <- chssB$moves()[move_num]
+  chssB$move(move_choice)
+  new_square <- str_match(move_choice, "[abcdefgh][12345678]")
+  piece_changer <- chssB$get(new_square)
+  color_change <- ""
+  if(piece_changer$color == "w"){
+    color_change <- "b"
+  }
+  else{
+    color_change <- "w"
+  }
+  chssB$put(piece_changer$type, color_change, new_square)
+  plot(chssB)
+We tested 5 different starting positions for each piece and simulated 10,000 moves. Using the 10,000 moves we kept track of each time the piece moved back to its original position and recorded how many moves it took for it to occur. We then plotted the distributions for the number of turns it took for each of the five positions. 
+
+```{r Position tracker, message=FALSE, warning=FALSE, include=FALSE}
+#Purpose: Create function that clears the board of any pieces and places new piece with new position each time it is called to see if distribution of number of turns changes with different starting positions.
+#Input: string of "q" for a queen, "k" for a king, "p" for a pawn, "n" for a knight, "r" for a rook, "b" for a bishop
+#Output: Distribution plot of number of times a piece moves back to its original position after a set number of total moves
+position_tracker <- function(piece) { 
+  chss$clear() 
+  chss$moves(verbose = TRUE) 
+  selector_place(piece) 
+  replicate(10000, selector_move()) # Repeats moves 10000 times
+  pieceDf <- chss$history(verbose = TRUE) # Creates data frame to track position of piece
+  pieceDf <- subset(pieceDf, to == from[1]) # Only includes turns where piece moved back to starting position
+  pieceDf <- pieceDf %>% mutate(Turns = number_move - lag(number_move, default = first(number_move))) # Creates column that shows number of moves it took to return back to original position.
+  pieceDf[1,8] = pieceDf[1,7] # Sets first turn piece moved back to origin to the original number of moves since previous code made it equal to 0.
+  ggplot(data = pieceDf, aes(x = Turns)) + geom_density() + geom_vline(data = pieceDf, aes(xintercept = mean(Turns)), linetype="dashed", size=1) + theme_classic() + scale_x_continuous(limits = c(0, 200)) # Creates density plot of number of moves it took for the piece to return to its original position.
+}
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+selector_placeB("b")
+replicate(1000, selector_moveB()) ## Repeats moves 1000 times
+bishop_position <- chssB$history(verbose = TRUE) ## Creates data frame to track position
+bishopDf <- subset(bishop_position, to == from[1])
+originalBishop <- bishopDf[1,7]
+```
+###### Bishop Distributions
+
+For the bishop, the average number of turns seems to be around 35 turns. However, there does seem to be a bit of variation with the mean ranging from around 25 to 45. The shape of the distributions do not appear to be very different from each other. Based off of the distribution plots, it appears that starting position may affect the average number of turns for a piece to return to its starting position, however the overall distribution of the number of turns in not affected all that much. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+originalBishop
+position_tracker("b")
+position_tracker("b")
+position_tracker("b")
+position_tracker("b")
+position_tracker("b")
+```
+
+###### Rook Functions
+###### Rook Distributions
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+chssR <- Chess$new()
+chssR$clear()
+chssR$moves(verbose = TRUE)
+selector_placeR <- function(piece){
+  number <- sample(1:8, 1)
+  letter <- sample(letters[1:8], 1)
+  spot <- paste(letter, number, sep = "")
+  chssR$put(piece, "w", spot)
+  plot(chssR)
+}
+selector_moveR <- function(){
+  move_num <- sample(1:length(chssR$moves()), 1)
+  move_choice <- chssR$moves()[move_num]
+  chssR$move(move_choice)
+  new_square <- str_match(move_choice, "[abcdefgh][12345678]")
+  piece_changer <- chssR$get(new_square)
+  color_change <- ""
+  if(piece_changer$color == "w"){
+    color_change <- "b"
+  }
+  else{
+    color_change <- "w"
+  }
+  chssR$put(piece_changer$type, color_change, new_square)
+  plot(chssR)
+}
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+selector_placeR("r")
+replicate(1000, selector_moveR()) ## Repeats moves 1000 times
+rook_position <- chssR$history(verbose = TRUE) ## Creates data frame to track
+rookDf <- subset(rook_position, to == from[1])
+originalRook <- rookDf[1,7]
+```
+For the rook, the mean number of turns it took for the piece to return to its original position for each starting postion is around 60 turns, with little variation between the positions. Based off of the distribution plots, it does not appear that starting position affects the mean number of turns it would take for a rook to return to its original position or the shape of the distribution.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+originalRook
+position_tracker("r")
+position_tracker("r")
+position_tracker("r")
+position_tracker("r")
+position_tracker("r")
+```
+
+###### Knight Functions
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+chssN <- Chess$new()
+chssN$clear()
+chssN$moves(verbose = TRUE)
+selector_placeN <- function(piece){
+  number <- sample(1:8, 1)
+  letter <- sample(letters[1:8], 1)
+  spot <- paste(letter, number, sep = "")
+  chssN$put(piece, "w", spot)
+  plot(chssN)
+}
+selector_moveN <- function(){
+  move_num <- sample(1:length(chssN$moves()), 1)
+  move_choice <- chssN$moves()[move_num]
+  chssN$move(move_choice)
+  new_square <- str_match(move_choice, "[abcdefgh][12345678]")
+  piece_changer <- chssN$get(new_square)
+  color_change <- ""
+  if(piece_changer$color == "w"){
+    color_change <- "b"
+  }
+  else{
+    color_change <- "w"
+  }
+  chssN$put(piece_changer$type, color_change, new_square)
+  plot(chssN)
+}
+```
+###### Knight Distributions
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+selector_placeN("n")
+replicate(1000, selector_moveN()) ## Repeats moves 1000 times
+knight_position <- chssN$history(verbose = TRUE) ## Creates data frame to track
+knightDf <- subset(knight_position, to == from[1])
+originalKnight <- knightDf[1,7]
+```
+For the knight, there is a much wider range of what the mean number of turns it took to return to the pieces original position which in turn also makes the shapes of the distributions different. Based on this, it seems like the starting postion for a knight affects how many turns it would take to its original position. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+originalKnight
+position_tracker("n")
+position_tracker("n")
+position_tracker("n")
+position_tracker("n")
+position_tracker("n")
+```
+
+###### Queen Functions
+###### Queen Distributions
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+chssQ <- Chess$new()
+chssQ$clear()
+chssQ$moves(verbose = TRUE)
+selector_placeQ <- function(piece){
+  number <- sample(1:8, 1)
+  letter <- sample(letters[1:8], 1)
+  spot <- paste(letter, number, sep = "")
+  chssQ$put(piece, "w", spot)
+  plot(chssQ)
+}
+selector_moveQ <- function(){
+  move_num <- sample(1:length(chssQ$moves()), 1)
+  move_choice <- chssQ$moves()[move_num]
+  chssQ$move(move_choice)
+  new_square <- str_match(move_choice, "[abcdefgh][12345678]")
+  piece_changer <- chssQ$get(new_square)
+  color_change <- ""
+  if(piece_changer$color == "w"){
+    color_change <- "b"
+  }
+  else{
+    color_change <- "w"
+  }
+  chssQ$put(piece_changer$type, color_change, new_square)
+  plot(chssQ)
+}
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+selector_placeQ("q")
+replicate(1000, selector_moveQ()) ## Repeats moves 1000 times
+queen_position <- chssQ$history(verbose = TRUE) ## Creates data frame to track position
+queenDf <- subset(queen_position, to == from[1]) ## Df with only moves that returned to original position
+originalQueen <- queenDf[1,7] ## Df with first turn where piece returned to its original position
+```
+For the queen, the mean number of turns appears to stay around 60, however there is a bit of variation both above and below 60. The shape of the distributions do not change much between the positions. Based on this, it does not appear that the starting position for a queen affects how many moves on average it takes to return to that position.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+originalQueen
+position_tracker("q")
+position_tracker("q")
+position_tracker("q")
+position_tracker("q")
+position_tracker("q")
+```
+
+###### King Functions
+###### King Distributions
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+chssK <- Chess$new()
+chssK$clear()
+chssK$moves(verbose = TRUE)
+selector_placeK <- function(piece){
+  number <- sample(1:8, 1)
+  letter <- sample(letters[1:8], 1)
+  spot <- paste(letter, number, sep = "")
+  chssK$put(piece, "w", spot)
+  plot(chssK)
+}
+selector_moveK <- function(){
+  move_num <- sample(1:length(chssK$moves()), 1)
+  move_choice <- chssK$moves()[move_num]
+  chssK$move(move_choice)
+  new_square <- str_match(move_choice, "[abcdefgh][12345678]")
+  piece_changer <- chssK$get(new_square)
+  color_change <- ""
+  if(piece_changer$color == "w"){
+    color_change <- "b"
+  }
+  else{
+    color_change <- "w"
+  }
+  chssK$put(piece_changer$type, color_change, new_square)
+  plot(chssK)
+}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+position_tracker("k")
+position_tracker("k")
+position_tracker("k")
+position_tracker("k")
+position_tracker("k")
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+selector_placeK("k")
+replicate(1000, selector_moveK()) ## Repeats moves 1000 times. Function gives back an error FIX ME. length of assertion in not 1
+king_position <- chssK$history(verbose = TRUE) ## Creates data frame to track
+kingDf <- subset(king_position, to == from[1])
+originalKing <- kingDf[1,7]
+```
+###### Comparing Distributions between Pieces
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+originalKing
+```
+The only piece that was greatly affected by starting position was the knight. This makes sense as the knight has the least amount of legal moves it can make given that there are no other pieces on the board (8 moves). So if that piece started where it number of legal moves would decrease even more, it makes sense that the number of turns would be affected more than the other pieces. The bishop had the lowest average amount of turns between the remaining four pieces. This also makes sense as it is the next most resricted piece in terms of number of legal moves, being that it can only move in four directions for as many spaces as the board has. The rook and the queen had similar average number of turns although the shapes of their distributions were a little different. This also makes sense as the queen can move like both the rook and the bishop, so it has more possible moves than any other piece which causes an increase in spread which changes the shape of the distribution.
 ```
 
 4. _Visit Some Friends_ Consider two drunken chessmasters playing against each other. They both start with a king and a queen, in the traditional starting positions. They each will take turns making moves at random from all possible legal moves. The players are allowed to "attack" the other player's pieces, and the game stops when a player attacks the other player's King. Simulate this process. (Since these chessmasters are presumably drunk, you may ignore the conditions and rules that place a King into "check".)
