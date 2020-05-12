@@ -390,6 +390,86 @@ originalKing
 ```
 The only piece that was greatly affected by starting position was the knight. This makes sense as the knight has the least amount of legal moves it can make given that there are no other pieces on the board (8 moves). So if that piece started where it number of legal moves would decrease even more, it makes sense that the number of turns would be affected more than the other pieces. The bishop had the lowest average amount of turns between the remaining four pieces. This also makes sense as it is the next most resricted piece in terms of number of legal moves, being that it can only move in four directions for as many spaces as the board has. The rook and the queen had similar average number of turns although the shapes of their distributions were a little different. This also makes sense as the queen can move like both the rook and the bishop, so it has more possible moves than any other piece which causes an increase in spread which changes the shape of the distribution.
 ```
+We tested 5 different starting positions for each piece and simulated 10,000 moves. Using the 10,000 moves we kept track of each time the piece moved back to its original position and recorded how many moves it took for it to occur. We then plotted the distributions for the number of turns it took for each of the five positions. 
+
+```{r Position tracker, message=FALSE, warning=FALSE, include=FALSE}
+#Purpose: Create function that clears the board of any pieces and places new piece with new position each time it is called to see if distribution of number of turns changes with different starting positions.
+#Input: string of "q" for a queen, "k" for a king, "p" for a pawn, "n" for a knight, "r" for a rook, "b" for a bishop
+#Output: Distribution plot of number of times a piece moves back to its original position after a set number of total moves
+position_tracker <- function(piece) { 
+  chss$clear() 
+  chss$moves(verbose = TRUE) 
+  selector_place(piece) 
+  replicate(10000, selector_move()) # Repeats moves 10000 times
+  pieceDf <- chss$history(verbose = TRUE) # Creates data frame to track position of piece
+  pieceDf <- subset(pieceDf, to == from[1]) # Only includes turns where piece moved back to starting position
+  pieceDf <- pieceDf %>% mutate(Turns = number_move - lag(number_move, default = first(number_move))) # Creates column that shows number of moves it took to return back to original position.
+  pieceDf[1,8] = pieceDf[1,7] # Sets first turn piece moved back to origin to the original number of moves since previous code made it equal to 0.
+  ggplot(data = pieceDf, aes(x = Turns)) + geom_density() + geom_vline(data = pieceDf, aes(xintercept = mean(Turns)), linetype="dashed", size=1) + theme_classic() + scale_x_continuous(limits = c(0, 200)) # Creates density plot of number of moves it took for the piece to return to its original position.
+}
+```
+
+###### Bishop Distributions
+
+For the bishop, the average number of turns seems to be around 35 turns. However, there does seem to be a bit of variation with the mean ranging from around 25 to 45. The shape of the distributions do not appear to be very different from each other. Based off of the distribution plots, it appears that starting position may affect the average number of turns for a piece to return to its starting position, however the overall distribution of the number of turns in not affected all that much. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+position_tracker("b")
+position_tracker("b")
+position_tracker("b")
+position_tracker("b")
+position_tracker("b")
+```
+
+###### Rook Distributions
+
+For the rook, the mean number of turns it took for the piece to return to its original position for each starting postion is around 60 turns, with little variation between the positions. Based off of the distribution plots, it does not appear that starting position affects the mean number of turns it would take for a rook to return to its original position or the shape of the distribution.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+position_tracker("r")
+position_tracker("r")
+position_tracker("r")
+position_tracker("r")
+position_tracker("r")
+```
+
+###### Knight Distributions
+
+For the knight, there is a much wider range of what the mean number of turns it took to return to the pieces original position which in turn also makes the shapes of the distributions different. Based on this, it seems like the starting postion for a knight affects how many turns it would take to its original position. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+position_tracker("n")
+position_tracker("n")
+position_tracker("n")
+position_tracker("n")
+position_tracker("n")
+```
+
+###### Queen Distributions
+
+For the queen, the mean number of turns appears to stay around 60, however there is a bit of variation both above and below 60. The shape of the distributions do not change much between the positions. Based on this, it does not appear that the starting position for a queen affects how many moves on average it takes to return to that position.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+position_tracker("q")
+position_tracker("q")
+position_tracker("q")
+position_tracker("q")
+position_tracker("q")
+```
+
+###### King Distributions
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+position_tracker("k")
+position_tracker("k")
+position_tracker("k")
+position_tracker("k")
+position_tracker("k")
+```
+
+###### Comparing Distributions between Pieces
+
+The only piece that was greatly affected by starting position was the knight. This makes sense as the knight has the least amount of legal moves it can make given that there are no other pieces on the board (8 moves). So if that piece started where it number of legal moves would decrease even more, it makes sense that the number of turns would be affected more than the other pieces. The bishop had the lowest average amount of turns between the remaining four pieces. This also makes sense as it is the next most resricted piece in terms of number of legal moves, being that it can only move in four directions for as many spaces as the board has. The rook and the queen had similar average number of turns although the shapes of their distributions were a little different. This also makes sense as the queen can move like both the rook and the bishop, so it has more possible moves than any other piece which causes an increase in spread which changes the shape of the distribution.
 
 4. _Visit Some Friends_ Consider two drunken chessmasters playing against each other. They both start with a king and a queen, in the traditional starting positions. They each will take turns making moves at random from all possible legal moves. The players are allowed to "attack" the other player's pieces, and the game stops when a player attacks the other player's King. Simulate this process. (Since these chessmasters are presumably drunk, you may ignore the conditions and rules that place a King into "check".)
 ```{r}
